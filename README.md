@@ -1,24 +1,27 @@
-# front
+# Front
 
-## Project setup
-```
+Front React + Vite + MUI pour la gestion des serveurs.
+
+## Installation
+
+```bash
 npm install
 ```
 
-### Compiles and hot-reloads for development
-```
-npm run serve
+## Développement
+
+```bash
+npm run dev
 ```
 
-### Compiles and minifies for production
-```
+## Build production
+
+```bash
 npm run build
 ```
 
-### Lints and fixes files
-```
-npm run lint
-```
+## Preview locale du build
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+```bash
+npm run preview
+```
