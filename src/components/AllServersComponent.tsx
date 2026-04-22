@@ -1,0 +1,137 @@
+import { Alert, Button, Card, CardContent, Chip, LinearProgress, Stack, Tooltip, Typography } from "@mui/material";
+import MemoryIcon from "@mui/icons-material/Memory";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import type { DisplayedServer } from "../types/server";
+
+interface ServersDashboardProps {
+  servers: DisplayedServer[];
+  isLoading: boolean;
+  error: string;
+  connected: boolean;
+  canEdit?: boolean;
+  lastRefreshedAt?: Date | null;
+  onRefresh?: () => void;
+  onViewServer?: (serverId: string) => void;
+  onEditServer?: (serverId: string) => void;
+}
+
+function ServersDashboard({
+  servers,
+  isLoading,
+  error,
+  connected,
+  canEdit = false,
+  lastRefreshedAt,
+  onRefresh,
+  onViewServer,
+  onEditServer,
+}: ServersDashboardProps) {
+  const onlineCount = servers.filter((server) => server.status === "online").length;
+
+  const refreshLabel = lastRefreshedAt
+    ? `Mis à jour ${lastRefreshedAt.toLocaleTimeString()}`
+    : "Jamais mis à jour";
+
+  return (
+    <Stack spacing={2}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Typography variant="h5" fontWeight={700}>
+          Etat des serveurs
+        </Typography>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Chip
+            icon={<MemoryIcon />}
+            color="success"
+            label={`${onlineCount}/${servers.length} en ligne`}
+          />
+          {connected && onRefresh && (
+            <Tooltip title={refreshLabel}>
+              <span>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<RefreshIcon />}
+                  onClick={onRefresh}
+                  disabled={isLoading}
+                >
+                  Actualiser
+                </Button>
+              </span>
+            </Tooltip>
+          )}
+        </Stack>
+      </Stack>
+
+      {!connected && (
+        <Alert severity="info">
+          Connecte-toi pour charger les donnees des serveurs.
+        </Alert>
+      )}
+
+      {error && connected && <Alert severity="warning">{error}</Alert>}
+
+      {isLoading && <LinearProgress />}
+
+      {!isLoading && connected && servers.length === 0 && (
+        <Card sx={{ borderRadius: 3 }}>
+          <CardContent>
+            <Typography variant="body1">Aucun serveur a afficher.</Typography>
+          </CardContent>
+        </Card>
+      )}
+
+      {servers.map((server) => (
+        <Card key={server.name} sx={{ borderRadius: 3 }}>
+          <CardContent>
+            <Stack spacing={1.5}>
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography variant="h6">{server.name}</Typography>
+                <Chip
+                  label={
+                    server.status === "online"
+                      ? "En ligne"
+                      : server.status === "offline"
+                        ? "Hors ligne"
+                        : server.status === "unreachable"
+                          ? "Inaccessible"
+                          : "Inconnu"
+                  }
+                  color={
+                    server.status === "online"
+                      ? "success"
+                      : server.status === "unreachable"
+                        ? "error"
+                        : "default"
+                  }
+                />
+              </Stack>
+
+              {(server.id || server.identifier) && (
+                <Stack direction="row" spacing={1} justifyContent="flex-end">
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => onViewServer?.(server.id || server.identifier || "")}
+                  >
+                    Voir
+                  </Button>
+                  {canEdit && (
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={() => onEditServer?.(server.id || server.identifier || "")}
+                    >
+                      Modifier
+                    </Button>
+                  )}
+                </Stack>
+              )}
+            </Stack>
+          </CardContent>
+        </Card>
+      ))}
+    </Stack>
+  );
+}
+
+export default ServersDashboard;
