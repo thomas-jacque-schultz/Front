@@ -229,7 +229,7 @@ function GameServerFormPage() {
       }}
     >
       <Container maxWidth="md">
-        <Card sx={{ borderRadius: 4 }}>
+        <Card>
           <CardContent sx={{ p: { xs: 3, md: 4 } }}>
             <Stack spacing={3} component="form" onSubmit={onSubmit}>
               <Typography variant="h4" fontWeight={700}>

@@ -2,6 +2,7 @@ import { ApiError, requestJson } from "./httpClient";
 import type {
   DisplayedServer,
   GamingServerDto,
+  PublicServerStatusDto,
   ServerStatus,
   UpsertGamingServerPayload,
 } from "../types/server";
@@ -39,12 +40,20 @@ const toDisplayedServer = (server: GamingServerDto): DisplayedServer => ({
   lastStatusCheckAt: server.lastStatusCheckAt,
 });
 
-export const getGamingServersApi = async (token: string): Promise<GamingServerDto[]> => {
-  return requestJson<GamingServerDto[]>("/gaming-server", {
+const toPublicDisplayedServer = (server: PublicServerStatusDto): DisplayedServer => ({
+  name: server.name || "Serveur inconnu",
+  status: normalizeStatus(server.status),
+  lastStatusCheckAt: server.lastStatusCheckAt,
+});
+
+export const getGamingServersApi = async (token?: string): Promise<GamingServerDto[]> => {
+  return requestJson<GamingServerDto[]>("/bot/gaming-server", {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: token
+      ? {
+          Authorization: `Bearer ${token}`,
+        }
+      : undefined,
   });
 };
 
@@ -60,7 +69,7 @@ export const createGamingServerApi = async (
   token: string,
   payload: UpsertGamingServerPayload,
 ): Promise<GamingServerDto> => {
-  return requestJson<GamingServerDto>("/gaming-server", {
+  return requestJson<GamingServerDto>("/bot/gaming-server", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -74,7 +83,7 @@ export const updateGamingServerApi = async (
   id: string,
   payload: UpsertGamingServerPayload,
 ): Promise<GamingServerDto> => {
-  return requestJson<GamingServerDto>(`/gaming-server/${id}`, {
+  return requestJson<GamingServerDto>(`/bot/gaming-server/${id}`, {
     method: "PUT",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -84,7 +93,7 @@ export const updateGamingServerApi = async (
 };
 
 export const getDisplayedServersApi = async (
-  token: string,
+  token?: string,
 ): Promise<DisplayedServer[]> => {
   try {
     const response = await getGamingServersApi(token);
@@ -97,4 +106,46 @@ export const getDisplayedServersApi = async (
 
     throw error;
   }
+};
+
+export const getPublicDisplayedServersApi = async (): Promise<DisplayedServer[]> => {
+  try {
+    const response = await requestJson<PublicServerStatusDto[]>("/bot/gaming-server/public-status", {
+      method: "GET",
+    });
+
+    return response.map(toPublicDisplayedServer);
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) {
+      return fallbackServers;
+    }
+
+    throw error;
+  }
+};
+
+export const startGamingServerApi = async (
+  token: string,
+  identifier: string,
+): Promise<void> => {
+  await requestJson<{ status: string; message: string }>("/bot/gaming-server/command/start", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(identifier),
+  });
+};
+
+export const stopGamingServerApi = async (
+  token: string,
+  identifier: string,
+): Promise<void> => {
+  await requestJson<{ status: string; message: string }>("/bot/gaming-server/command/pause", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(identifier),
+  });
 };

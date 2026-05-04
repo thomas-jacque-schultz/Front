@@ -26,6 +26,12 @@ export interface GamingServerDto {
   lastStatusCheckAt?: string;
 }
 
+export interface PublicServerStatusDto {
+  name?: string;
+  status?: string;
+  lastStatusCheckAt?: string;
+}
+
 export interface UpsertGamingServerPayload {
   identifier: string;
   portainerStackId?: number;

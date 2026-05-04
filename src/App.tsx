@@ -46,7 +46,7 @@ function App() {
         }}
       >
         <Container maxWidth="sm">
-          <Card sx={{ borderRadius: 4 }}>
+          <Card>
             <CardContent sx={{ p: 4 }}>
               <Stack spacing={2}>
                 <Typography variant="h6">Validation de session...</Typography>

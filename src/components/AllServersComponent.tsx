@@ -1,6 +1,8 @@
 import { Alert, Button, Card, CardContent, Chip, LinearProgress, Stack, Tooltip, Typography } from "@mui/material";
 import MemoryIcon from "@mui/icons-material/Memory";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import PauseIcon from "@mui/icons-material/Pause";
 import type { DisplayedServer } from "../types/server";
 
 interface ServersDashboardProps {
@@ -8,11 +10,15 @@ interface ServersDashboardProps {
   isLoading: boolean;
   error: string;
   connected: boolean;
+  canControl?: boolean;
   canEdit?: boolean;
   lastRefreshedAt?: Date | null;
   onRefresh?: () => void;
   onViewServer?: (serverId: string) => void;
   onEditServer?: (serverId: string) => void;
+  onStartServer?: (serverIdentifier: string) => void;
+  onStopServer?: (serverIdentifier: string) => void;
+  pendingServerIdentifier?: string | null;
 }
 
 function ServersDashboard({
@@ -20,11 +26,15 @@ function ServersDashboard({
   isLoading,
   error,
   connected,
+  canControl = false,
   canEdit = false,
   lastRefreshedAt,
   onRefresh,
   onViewServer,
   onEditServer,
+  onStartServer,
+  onStopServer,
+  pendingServerIdentifier,
 }: ServersDashboardProps) {
   const onlineCount = servers.filter((server) => server.status === "online").length;
 
@@ -35,7 +45,7 @@ function ServersDashboard({
   return (
     <Stack spacing={2}>
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Typography variant="h5" fontWeight={700}>
+        <Typography variant="h5" fontWeight={700} color="grey.100">
           Etat des serveurs
         </Typography>
         <Stack direction="row" spacing={1} alignItems="center">
@@ -73,7 +83,7 @@ function ServersDashboard({
       {isLoading && <LinearProgress />}
 
       {!isLoading && connected && servers.length === 0 && (
-        <Card sx={{ borderRadius: 3 }}>
+        <Card>
           <CardContent>
             <Typography variant="body1">Aucun serveur a afficher.</Typography>
           </CardContent>
@@ -81,7 +91,7 @@ function ServersDashboard({
       )}
 
       {servers.map((server) => (
-        <Card key={server.name} sx={{ borderRadius: 3 }}>
+        <Card key={server.name}>
           <CardContent>
             <Stack spacing={1.5}>
               <Stack direction="row" justifyContent="space-between" alignItems="center">
@@ -108,13 +118,37 @@ function ServersDashboard({
 
               {(server.id || server.identifier) && (
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    onClick={() => onViewServer?.(server.id || server.identifier || "")}
-                  >
-                    Voir
-                  </Button>
+                  {canControl && server.identifier && (
+                    <>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<PlayArrowIcon />}
+                        onClick={() => onStartServer?.(server.identifier || "")}
+                        disabled={pendingServerIdentifier === server.identifier}
+                      >
+                        Start
+                      </Button>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<PauseIcon />}
+                        onClick={() => onStopServer?.(server.identifier || "")}
+                        disabled={pendingServerIdentifier === server.identifier}
+                      >
+                        Stop
+                      </Button>
+                    </>
+                  )}
+                  {onViewServer && (
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={() => onViewServer(server.id || server.identifier || "")}
+                    >
+                      Voir
+                    </Button>
+                  )}
                   {canEdit && (
                     <Button
                       size="small"

@@ -47,7 +47,7 @@ function LoginPage() {
       }}
     >
       <Container maxWidth="sm">
-        <Card sx={{ borderRadius: 4 }}>
+        <Card>
           <CardContent sx={{ p: 4 }}>
             <Stack spacing={3}>
               <Stack direction="row" spacing={1} alignItems="center">

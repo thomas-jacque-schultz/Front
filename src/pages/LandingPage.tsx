@@ -9,22 +9,18 @@ const REFRESH_INTERVAL_MS = 30_000;
 
 function LandingPage() {
   const navigate = useNavigate();
-  const { accessToken, connected } = useAuthStore();
-  const { servers, isLoading, error, lastRefreshedAt, loadServers, resetServers } = useServersStore();
+  const { connected } = useAuthStore();
+  const { servers, isLoading, error, lastRefreshedAt, loadPublicServers } = useServersStore();
 
   const refresh = useCallback(() => {
-    if (connected && accessToken) void loadServers(accessToken);
-  }, [connected, accessToken, loadServers]);
+    void loadPublicServers();
+  }, [loadPublicServers]);
 
   useEffect(() => {
-    if (!connected || !accessToken) {
-      resetServers();
-      return;
-    }
-    void loadServers(accessToken);
+    void loadPublicServers();
     const interval = setInterval(refresh, REFRESH_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [accessToken, connected, loadServers, resetServers, refresh]);
+  }, [loadPublicServers, refresh]);
 
   return (
     <Box
@@ -47,7 +43,7 @@ function LandingPage() {
       )}
 
       <Container maxWidth="md">
-        <Card sx={{ borderRadius: 4 }}>
+        <Card>
           <CardContent sx={{ p: { xs: 3, md: 5 } }}>
             <Stack spacing={3}>
               <Typography variant="overline" color="primary" fontWeight={700}>
@@ -64,7 +60,7 @@ function LandingPage() {
                 servers={servers}
                 isLoading={isLoading}
                 error={error}
-                connected={connected}
+                connected
                 lastRefreshedAt={lastRefreshedAt}
                 onRefresh={refresh}
               />

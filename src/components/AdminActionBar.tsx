@@ -6,7 +6,7 @@ interface AdminActionBarProps {
 
 function AdminActionBar({ onCreateServer }: AdminActionBarProps) {
   return (
-    <Card sx={{ borderRadius: 3 }}>
+    <Card>
       <CardContent>
         <Stack
           direction={{ xs: "column", sm: "row" }}

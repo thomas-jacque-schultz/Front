@@ -6,7 +6,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { getDisplayedServersApi } from "../api/serversApi";
+import { getDisplayedServersApi, getPublicDisplayedServersApi } from "../api/serversApi";
 import type { DisplayedServer } from "../types/server";
 
 interface ServersStoreValue {
@@ -14,7 +14,8 @@ interface ServersStoreValue {
   isLoading: boolean;
   error: string;
   lastRefreshedAt: Date | null;
-  loadServers: (token: string) => Promise<void>;
+  loadServers: (token?: string) => Promise<void>;
+  loadPublicServers: () => Promise<void>;
   resetServers: () => void;
 }
 
@@ -26,12 +27,32 @@ export const ServersStoreProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<string>("");
   const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(null);
 
-  const loadServers = useCallback(async (token: string) => {
+  const loadServers = useCallback(async (token?: string) => {
     setIsLoading(true);
     setError("");
 
     try {
       const payload = await getDisplayedServersApi(token);
+      setServers(payload);
+      setLastRefreshedAt(new Date());
+    } catch (serversError) {
+      const message =
+        serversError instanceof Error
+          ? serversError.message
+          : "Impossible de charger les serveurs";
+      setError(message);
+      setServers([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const loadPublicServers = useCallback(async () => {
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const payload = await getPublicDisplayedServersApi();
       setServers(payload);
       setLastRefreshedAt(new Date());
     } catch (serversError) {
@@ -60,9 +81,10 @@ export const ServersStoreProvider = ({ children }: { children: ReactNode }) => {
       error,
       lastRefreshedAt,
       loadServers,
+      loadPublicServers,
       resetServers,
     }),
-    [servers, isLoading, error, lastRefreshedAt, loadServers, resetServers],
+    [servers, isLoading, error, lastRefreshedAt, loadServers, loadPublicServers, resetServers],
   );
 
   return (
