@@ -1,0 +1,46 @@
+name: Create GitHub Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get release notes
+        id: release_notes
+        run: |
+          VERSION=${{ github.ref_name }}
+          PREV_TAG=$(git tag -l --sort=-version:refname | grep -v $VERSION | head -1)
+          
+          if [ -z "$PREV_TAG" ]; then
+            CHANGELOG=$(git log --oneline --decorate)
+          else
+            CHANGELOG=$(git log ${PREV_TAG}..HEAD --oneline --decorate)
+          fi
+          
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          body: |
+            ## Changes
+            ```
+            ${{ steps.release_notes.outputs.changelog }}
+            ```
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
