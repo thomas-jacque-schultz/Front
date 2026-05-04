@@ -28,7 +28,7 @@ jobs:
 
       - name: Install and build
         run: |
-          npm ci
+          npm ci --ignore-scripts
           npm run build
 
       - name: Set up Docker Buildx
