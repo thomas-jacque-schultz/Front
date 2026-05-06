@@ -1,4 +1,4 @@
-name: Create GitHub Release
+name: release - github release
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
 
 jobs:
   create-release:
+    name: release - github
     runs-on: ubuntu-latest
     permissions:
       contents: write
