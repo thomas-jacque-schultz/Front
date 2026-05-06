@@ -1,10 +1,8 @@
-name: SonarCloud analysis
+name: pr - sonarcloud analysis
 
 on:
-  push:
-    branches: [ "develop", "main" ]
   pull_request:
-    branches: [ "develop", "main" ]
+    branches: [ "main" ]
   workflow_dispatch:
 
 permissions:
@@ -12,6 +10,7 @@ permissions:
 
 jobs:
   analysis:
+    name: pr - sonarcloud
     runs-on: ubuntu-latest
 
     steps:

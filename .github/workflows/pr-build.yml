@@ -1,15 +1,14 @@
-name: Build and Test
+name: pr - build and test
 
 on:
-  push:
-    branches:
-      - develop
   pull_request:
     branches:
-      - develop
+      - main
+  workflow_dispatch:
 
 jobs:
   build:
+    name: pr - build
     runs-on: ubuntu-latest
 
     steps:
